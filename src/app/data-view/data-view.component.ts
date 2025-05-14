@@ -1,10 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { PanelModule } from 'primeng/panel';
 import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
 import { TabsModule } from 'primeng/tabs';
+import { GetDataService, UserRole } from '../get-data.service';
 @Component({
   selector: 'app-data-view',
   standalone: true,
@@ -12,38 +13,34 @@ import { TabsModule } from 'primeng/tabs';
   templateUrl: './data-view.component.html',
   styleUrls: ['./data-view.component.css']
 })
-export class DataViewComponent {
-  users = [
-    {
-      AdminNote: null,
-      DateEntered: "2024-05-11 12:08:55",
-      Department: "department 1",
-      Descr: "Super admin",
-      ID: 1,
-      IsActive: 1,
-      Role: "SuperAdmin 1",
-      SignAndVerify: 0,
-      SystemNote: null,
-      UpdateDate: "2025-05-11 12:08:55",
-      UserName: "Admin_1"
-    },
-    {
-      AdminNote: "comment",
-      DateEntered: "2024-05-11 12:08:55",
-      Department: "department 2",
-      Descr: "admin",
-      ID: 5,
-      IsActive: 1,
-      Role: "Admin",
-      SignAndVerify: 0,
-      SystemNote: "systemNote",
-      UpdateDate: "2025-05-11 12:08:55",
-      UserName: "Admin Admi"
-    }
-  ];
+export class DataViewComponent implements OnInit {
+ users: UserRole[] = [];
+  columns: { field: keyof UserRole; header: string }[] = [];
 
-
+  private userRoleService = inject(GetDataService);
   expandedRows: { [key: number]: boolean } = {};
+  ngOnInit(): void {
+  this.userRoleService.getData().subscribe(data => {
+      this.users = data;
+
+      // Generate columns from keys (filtering out unwanted fields if needed)
+      this.columns = Object.keys(data[0])
+     //   .filter(key => key !== 'ID') // Optionally exclude keys like 'ID'
+        .map(key => ({ field: key as keyof UserRole, header: this.formatHeader(key) }));
+    });
+  }
+
+
+toggleRowExpansion(user: UserRole) {
+    this.expandedRows[user.ID]
+      ? delete this.expandedRows[user.ID]
+      : this.expandedRows[user.ID] = true;
+  }
+
+  formatHeader(key: string): string {
+    // Convert camel case to readable format: UserName -> User Name
+    return key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+  }
 
   onRowExpand(event: any) {
 
