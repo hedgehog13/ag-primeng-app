@@ -1,5 +1,7 @@
 import { Injectable, resource } from '@angular/core';
 import { Observable, of } from 'rxjs';
+import { UserDetailsComponent } from './user-details/user-details.component';
+import { UserContactComponent } from './user-contact/user-contact.component';
 export interface UserRole {
   AdminNote: string | null;
   DateEntered: string;
@@ -51,4 +53,7 @@ export class GetDataService {
   getData = (): Observable<UserRole[]> => {
     return of(this.users)
   }
+
+
+
 }
